@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Taller Mecánico</title>
+<style>
+  :root { --bg:#f4f5f7; --card:#fff; --text:#1f2933; --muted:#6b7280; --accent:#c2410c; --line:#e5e7eb; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:system-ui,Segoe UI,Roboto,sans-serif; background:var(--bg); color:var(--text); }
+  header { background:#1f2933; color:#fff; padding:14px 24px; display:flex; align-items:center; gap:24px; flex-wrap:wrap; }
+  header h1 { margin:0; font-size:20px; }
+  nav button { background:none; border:none; color:#cbd5e1; font-size:15px; padding:8px 14px; cursor:pointer; border-radius:6px; }
+  nav button.active, nav button:hover { background:var(--accent); color:#fff; }
+  main { max-width:1000px; margin:24px auto; padding:0 16px; }
+  section { display:none; }
+  section.active { display:block; }
+  .card { background:var(--card); border-radius:10px; padding:18px; margin-bottom:18px; box-shadow:0 1px 3px rgba(0,0,0,.08); }
+  h2 { margin:0 0 12px; font-size:18px; }
+  form { display:flex; flex-wrap:wrap; gap:10px; align-items:flex-end; }
+  label { display:flex; flex-direction:column; font-size:13px; color:var(--muted); gap:4px; }
+  input, select, textarea { padding:8px 10px; border:1px solid var(--line); border-radius:6px; font-size:14px; min-width:150px; }
+  button.btn { background:var(--accent); color:#fff; border:none; padding:9px 16px; border-radius:6px; cursor:pointer; font-size:14px; }
+  button.btn.sec { background:#475569; }
+  button.btn.del { background:#b91c1c; padding:5px 10px; font-size:12px; }
+  button.btn.sm { padding:5px 10px; font-size:12px; }
+  table { width:100%; border-collapse:collapse; font-size:14px; }
+  th, td { text-align:left; padding:8px 6px; border-bottom:1px solid var(--line); vertical-align:top; }
+  th { color:var(--muted); font-weight:600; font-size:12px; text-transform:uppercase; }
+  .badge { padding:3px 9px; border-radius:999px; font-size:12px; font-weight:600; }
+  .pendiente { background:#fef3c7; color:#92400e; }
+  .en_proceso { background:#dbeafe; color:#1e40af; }
+  .finalizada { background:#dcfce7; color:#166534; }
+  #msg { position:fixed; bottom:20px; right:20px; padding:12px 18px; border-radius:8px; color:#fff; display:none; max-width:320px; }
+  #msg.ok { background:#166534; } #msg.err { background:#b91c1c; }
+  .checks { display:flex; flex-wrap:wrap; gap:8px 16px; }
+  .checks label { flex-direction:row; align-items:center; color:var(--text); font-size:14px; }
+  .checks input { min-width:0; }
+  .empty { color:var(--muted); padding:10px 0; }
+  .total { font-weight:700; }
+</style>
+</head>
+<body>
+<header>
+  <h1>🔧 Taller Mecánico</h1>
+  <nav>
+    <button data-tab="ordenes" class="active">Órdenes</button>
+    <button data-tab="clientes">Clientes</button>
+    <button data-tab="vehiculos">Vehículos</button>
+    <button data-tab="servicios">Servicios</button>
+  </nav>
+</header>
+
+<main>
+  <!-- ÓRDENES -->
+  <section id="ordenes" class="active">
+    <div class="card">
+      <h2>Nueva orden de trabajo</h2>
+      <form id="f-orden">
+        <label>Vehículo <select id="o-vehiculo" required></select></label>
+        <label style="flex:1">Descripción <input id="o-desc" placeholder="Ej. Ruido al frenar"></label>
+        <div style="width:100%">
+          <div style="font-size:13px;color:var(--muted);margin-bottom:6px">Servicios</div>
+          <div class="checks" id="o-servicios"></div>
+        </div>
+        <button class="btn">Crear orden</button>
+      </form>
+    </div>
+    <div class="card">
+      <h2>Órdenes</h2>
+      <div id="t-ordenes"></div>
+    </div>
+  </section>
+
+  <!-- CLIENTES -->
+  <section id="clientes">
+    <div class="card">
+      <h2 id="c-titulo">Nuevo cliente</h2>
+      <form id="f-cliente">
+        <input type="hidden" id="c-id">
+        <label>Nombre <input id="c-nombre" required></label>
+        <label>Teléfono <input id="c-tel"></label>
+        <label>Email <input id="c-email" type="email"></label>
+        <button class="btn">Guardar</button>
+        <button type="button" class="btn sec" id="c-cancel" style="display:none">Cancelar</button>
+      </form>
+    </div>
+    <div class="card"><h2>Clientes</h2><div id="t-clientes"></div></div>
+  </section>
+
+  <!-- VEHÍCULOS -->
+  <section id="vehiculos">
+    <div class="card">
+      <h2>Nuevo vehículo</h2>
+      <form id="f-vehiculo">
+        <label>Cliente <select id="v-cliente" required></select></label>
+        <label>Placa <input id="v-placa" required></label>
+        <label>Marca <input id="v-marca" required></label>
+        <label>Modelo <input id="v-modelo" required></label>
+        <label>Año <input id="v-anio" type="number" min="1950" max="2100"></label>
+        <button class="btn">Guardar</button>
+      </form>
+    </div>
+    <div class="card"><h2>Vehículos</h2><div id="t-vehiculos"></div></div>
+  </section>
+
+  <!-- SERVICIOS -->
+  <section id="servicios">
+    <div class="card">
+      <h2>Nuevo servicio</h2>
+      <form id="f-servicio">
+        <label>Nombre <input id="s-nombre" required></label>
+        <label>Precio (Q) <input id="s-precio" type="number" min="0" step="0.01" required></label>
+        <button class="btn">Guardar</button>
+      </form>
+    </div>
+    <div class="card"><h2>Catálogo de servicios</h2><div id="t-servicios"></div></div>
+  </section>
+</main>
+<div id="msg"></div>
+
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const Q = n => 'Q' + Number(n).toFixed(2);
+
+function aviso(texto, tipo = 'ok') {
+  const m = $('msg'); m.textContent = texto; m.className = tipo; m.style.display = 'block';
+  setTimeout(() => (m.style.display = 'none'), 3000);
+}
+
+async function api(url, metodo = 'GET', body) {
+  const r = await fetch(url, {
+    method: metodo,
+    headers: { 'Content-Type': 'application/json' },
+    body: body ? JSON.stringify(body) : undefined
+  });
+  const data = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(data.error || 'Error en la solicitud');
+  return data;
+}
+
+// Navegación por pestañas
+document.querySelectorAll('nav button').forEach(b => b.onclick = () => {
+  document.querySelectorAll('nav button, section').forEach(e => e.classList.remove('active'));
+  b.classList.add('active'); $(b.dataset.tab).classList.add('active');
+});
+
+let clientes = [], vehiculos = [], servicios = [], ordenes = [];
+
+async function cargarTodo() {
+  [clientes, vehiculos, servicios, ordenes] = await Promise.all([
+    api('/api/clientes'), api('/api/vehiculos'), api('/api/servicios'), api('/api/ordenes')
+  ]);
+  pintar();
+}
+
+function tabla(cols, filas) {
+  if (!filas.length) return '<div class="empty">Sin registros todavía.</div>';
+  return `<table><thead><tr>${cols.map(c => `<th>${c}</th>`).join('')}</tr></thead><tbody>${filas.join('')}</tbody></table>`;
+}
+
+function pintar() {
+  // Clientes
+  $('t-clientes').innerHTML = tabla(['ID','Nombre','Teléfono','Email',''], clientes.map(c =>
+    `<tr><td>${c.id}</td><td>${esc(c.nombre)}</td><td>${esc(c.telefono)}</td><td>${esc(c.email)}</td>
+     <td><button class="btn sm sec" onclick="editarCliente(${c.id})">Editar</button>
+         <button class="btn del" onclick="borrar('clientes',${c.id},'¿Eliminar cliente y sus vehículos y órdenes?')">Eliminar</button></td></tr>`));
+
+  // Vehículos
+  $('t-vehiculos').innerHTML = tabla(['Placa','Vehículo','Año','Cliente',''], vehiculos.map(v =>
+    `<tr><td>${esc(v.placa)}</td><td>${esc(v.marca)} ${esc(v.modelo)}</td><td>${esc(v.anio)}</td><td>${esc(v.cliente)}</td>
+     <td><button class="btn del" onclick="borrar('vehiculos',${v.id},'¿Eliminar vehículo y sus órdenes?')">Eliminar</button></td></tr>`));
+  $('v-cliente').innerHTML = clientes.length
+    ? clientes.map(c => `<option value="${c.id}">${esc(c.nombre)}</option>`).join('')
+    : '<option value="">Primero registre un cliente</option>';
+
+  // Servicios
+  $('t-servicios').innerHTML = tabla(['Servicio','Precio',''], servicios.map(s =>
+    `<tr><td>${esc(s.nombre)}</td><td>${Q(s.precio)}</td>
+     <td><button class="btn del" onclick="borrar('servicios',${s.id},'¿Eliminar servicio?')">Eliminar</button></td></tr>`));
+  $('o-servicios').innerHTML = servicios.map(s =>
+    `<label><input type="checkbox" value="${s.id}"> ${esc(s.nombre)} (${Q(s.precio)})</label>`).join('');
+
+  // Órdenes
+  $('o-vehiculo').innerHTML = vehiculos.length
+    ? vehiculos.map(v => `<option value="${v.id}">${esc(v.placa)} - ${esc(v.marca)} ${esc(v.modelo)} (${esc(v.cliente)})</option>`).join('')
+    : '<option value="">Primero registre un vehículo</option>';
+  const etiqueta = { pendiente:'Pendiente', en_proceso:'En proceso', finalizada:'Finalizada' };
+  $('t-ordenes').innerHTML = tabla(['#','Fecha','Vehículo / Cliente','Servicios','Total','Estado',''], ordenes.map(o =>
+    `<tr><td>${o.id}</td><td>${esc(o.fecha)}</td>
+     <td>${esc(o.placa)} - ${esc(o.marca)} ${esc(o.modelo)}<br><small>${esc(o.cliente)}</small>${o.descripcion ? `<br><small>${esc(o.descripcion)}</small>` : ''}</td>
+     <td>${o.servicios.map(s => esc(s.nombre)).join('<br>')}</td>
+     <td class="total">${Q(o.total)}</td>
+     <td><span class="badge ${o.estado}">${etiqueta[o.estado]}</span></td>
+     <td>${o.estado !== 'finalizada' ? `<button class="btn sm" onclick="avanzar(${o.id})">Avanzar</button> ` : ''}
+         <button class="btn del" onclick="borrar('ordenes',${o.id},'¿Eliminar orden?')">Eliminar</button></td></tr>`));
+}
+
+async function accion(fn, ok) {
+  try { await fn(); aviso(ok); await cargarTodo(); } catch (e) { aviso(e.message, 'err'); }
+}
+
+window.borrar = (recurso, id, pregunta) => confirm(pregunta) && accion(() => api(`/api/${recurso}/${id}`, 'DELETE'), 'Eliminado');
+window.avanzar = id => accion(() => api(`/api/ordenes/${id}/estado`, 'PATCH', {}), 'Estado actualizado');
+window.editarCliente = id => {
+  const c = clientes.find(x => x.id === id);
+  $('c-id').value = c.id; $('c-nombre').value = c.nombre; $('c-tel').value = c.telefono || ''; $('c-email').value = c.email || '';
+  $('c-titulo').textContent = 'Editar cliente'; $('c-cancel').style.display = '';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+};
+function limpiarCliente() {
+  $('f-cliente').reset(); $('c-id').value = ''; $('c-titulo').textContent = 'Nuevo cliente'; $('c-cancel').style.display = 'none';
+}
+$('c-cancel').onclick = limpiarCliente;
+
+$('f-cliente').onsubmit = e => {
+  e.preventDefault();
+  const body = { nombre: $('c-nombre').value, telefono: $('c-tel').value, email: $('c-email').value };
+  const id = $('c-id').value;
+  accion(() => id ? api(`/api/clientes/${id}`, 'PUT', body) : api('/api/clientes', 'POST', body), 'Cliente guardado').then(limpiarCliente);
+};
+$('f-vehiculo').onsubmit = e => {
+  e.preventDefault();
+  accion(() => api('/api/vehiculos', 'POST', {
+    cliente_id: $('v-cliente').value, placa: $('v-placa').value, marca: $('v-marca').value,
+    modelo: $('v-modelo').value, anio: $('v-anio').value
+  }), 'Vehículo guardado').then(() => $('f-vehiculo').reset());
+};
+$('f-servicio').onsubmit = e => {
+  e.preventDefault();
+  accion(() => api('/api/servicios', 'POST', { nombre: $('s-nombre').value, precio: $('s-precio').value }), 'Servicio guardado')
+    .then(() => $('f-servicio').reset());
+};
+$('f-orden').onsubmit = e => {
+  e.preventDefault();
+  const sel = [...document.querySelectorAll('#o-servicios input:checked')].map(i => Number(i.value));
+  accion(() => api('/api/ordenes', 'POST', {
+    vehiculo_id: $('o-vehiculo').value, descripcion: $('o-desc').value, servicios: sel
+  }), 'Orden creada').then(() => $('f-orden').reset());
+};
+
+cargarTodo();
+</script>
+</body>
+</html>

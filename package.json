@@ -1,0 +1,14 @@
+{
+  "name": "taller-mecanico",
+  "version": "1.0.0",
+  "description": "Sistema de Taller Mecánico - Node.js + Express + SQLite",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.5.0",
+    "express": "^4.21.0"
+  }
+}
